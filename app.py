@@ -4,124 +4,116 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Analisis Keandalan Lini Produksi", layout="wide")
 
-# ==========================
-# Judul & Pengantar Awal
-# ==========================
 st.title("🛠️ Analisis Keandalan Lini Produksi")
-st.subheader("Studi Kasus: Lini Perakitan Otomotif 'Nusantara Motor'")
+st.caption("Studi Kasus: Lini Perakitan Otomotif 'Nusantara Motor'")
 
-st.markdown("""
-📌 **Masalah yang Dianalisis**  
-Lini perakitan dengan mesin-mesin saling bergantung (sistem seri). Jika satu mesin gagal, seluruh lini berhenti.  
-
-🎯 **Tujuan:**  
-1. Menghitung keandalan total sistem.  
-2. Mengidentifikasi mata rantai terlemah.  
-3. Memberikan rekomendasi perbaikan.
-""")
-
-st.divider()
-
-# ==========================
-# SLIDER (kiri) + TABEL (kanan) dalam kolom
-# ==========================
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.subheader("1️⃣ Input Keandalan Mesin")
-    st.caption("Atur nilai keandalan tiap mesin dalam persen:")
-    with st.container(border=True):
-        r1 = st.slider("Stamping", 80, 100, 98)
-        r2 = st.slider("Welding", 80, 100, 99)
-        r3 = st.slider("Painting", 80, 100, 96)
-        r4 = st.slider("Assembly", 80, 100, 97)
-
-with col2:
-    with st.expander("📊 Tabel Keandalan Mesin"):
-        st.subheader("2️⃣ Ringkasan Input")
-        st.table({
-            "Mesin": ["Stamping", "Welding", "Painting", "Assembly"],
-            "Keandalan (%)": [r1, r2, r3, r4]
-        })
-
-# ==========================
-# PERHITUNGAN MODEL
-# ==========================
-r_vals = [r1/100, r2/100, r3/100, r4/100]
-Rs = np.prod(r_vals)
-P_fail = 1 - Rs
-weakest_name, weakest_val = min(zip(["Stamping", "Welding", "Painting", "Assembly"], r_vals), key=lambda x: x[1])
-
-# ==========================
-# HASIL SISTEM + RISIKO
-# ==========================
-st.divider()
-col3, col4 = st.columns(2)
-
-with col3:
-    st.subheader("3️⃣ Hasil Perhitungan")
-    st.metric(label="Keandalan Sistem", value=f"{Rs:.2%}")
-    st.metric(label="Probabilitas Kegagalan", value=f"{P_fail:.2%}")
-    st.caption("Hasil ini diperoleh dari perkalian keandalan seluruh mesin.")
-
-with col4:
-    st.subheader("4️⃣ Analisis Risiko & Rekomendasi")
-    kategori = "🟠 Risiko Menengah" if P_fail > 0.05 else "🟢 Risiko Rendah"
-    st.markdown(f"""
-    ✅ **Mata Rantai Terlemah:** {weakest_name} ({weakest_val:.0%})  
-    ✅ **Kategori Risiko:** {kategori} ({P_fail:.2%})
-    """)
+with st.expander("📌 1️⃣ Masalah & Tujuan Analisis", expanded=False):
     st.markdown("""
-    **Saran Perbaikan:**
-    - Fokuskan perawatan pada mesin **Painting**.
-    - Terapkan maintenance preventif & sensor.
-    - Standardisasi SOP dan pelatihan operator.
+    **Masalah:** Pada lini perakitan sistem seri, jika satu mesin gagal, seluruh proses berhenti.
+    
+    **Tujuan Analisis:**
+    - Menghitung keandalan total sistem produksi
+    - Mengidentifikasi *mata rantai terlemah*
+    - Memberikan rekomendasi berbasis hasil analisis
     """)
 
-# ==========================
-# EXPANDER DETAIL PERHITUNGAN
-# ==========================
-with st.expander("🔍 Penjelasan Detail Perhitungan"):
+with st.expander("📐 2️⃣ Konsep Sistem Seri & Rumus", expanded=False):
     st.markdown("""
-    - Model: Sistem Seri ➜ semua mesin harus berfungsi.
-    - Rumus:  
+    Dalam sistem seri, semua komponen saling bergantung. Kegagalan satu mesin menyebabkan sistem gagal total.
+    
+    **Rumus keandalan sistem:**
     """)
     st.latex(r"R_s = \prod_{i=1}^{n} R_i")
-    st.markdown(f"""
-    Substitusi nilai:  
-    R_s = {r_vals[0]:.2f} × {r_vals[1]:.2f} × {r_vals[2]:.2f} × {r_vals[3]:.2f} = {Rs:.4f}  
-    Probabilitas kegagalan = 1 - R_s = {P_fail:.4f}
-    """)
-
-# ==========================
-# GRAFIK & PENJELASAN
-# ==========================
-st.divider()
-st.subheader("5️⃣ Visualisasi Komponen & Sistem")
-
-labels = ["Stamping", "Welding", "Painting", "Assembly", "SISTEM"]
-values = r_vals + [Rs]
-colors = ['#87CEEB'] * 4
-colors[["Stamping", "Welding", "Painting", "Assembly"].index(weakest_name)] = '#FF6347'
-colors.append('#9370DB')
-
-fig, ax = plt.subplots(figsize=(10, 5))
-bars = ax.bar(labels, values, color=colors)
-ax.set_ylim(0.75, 1.01)
-ax.set_ylabel("Tingkat Keandalan")
-ax.set_title("Perbandingan Keandalan Mesin dan Sistem")
-for bar in bars:
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2%}", ha='center', va='bottom')
-st.pyplot(fig)
-
-with st.expander("📘 Penjelasan Grafik"):
     st.markdown("""
-    - Bar merah: komponen terlemah.
-    - Bar ungu: total keandalan sistem.
-    - Sistem seri sangat sensitif terhadap 1 titik lemah.
+    ➜ Sistem seri sangat sensitif pada komponen dengan keandalan terendah.  
+    ➜ Fokus pada peningkatan mesin terlemah memberikan dampak terbesar.
     """)
 
-# ==========================
-# FOOTER
-# ==========================
+# Input & Tabel berdampingan
+st.markdown("### 🔧 3️⃣ Input Data: Keandalan Mesin (%)")
+col_input, col_table = st.columns(2)
+
+with col_input:
+    st.subheader("🎚️ Input Slider")
+    st.caption("Atur nilai keandalan masing-masing mesin:")
+    r1 = st.slider("Stamping", 80, 100, 98, 1)
+    r2 = st.slider("Welding", 80, 100, 99, 1)
+    r3 = st.slider("Painting", 80, 100, 96, 1)
+    r4 = st.slider("Assembly", 80, 100, 97, 1)
+
+with col_table:
+    st.subheader("📊 Tabel Keandalan per Mesin")
+    st.table({
+        "Mesin": ["Stamping", "Welding", "Painting", "Assembly"],
+        "Keandalan (%)": [r1, r2, r3, r4]
+    })
+
+# Hitung nilai
+r1f, r2f, r3f, r4f = [r/100 for r in (r1, r2, r3, r4)]
+keandalan_sistem = np.prod([r1f, r2f, r3f, r4f])
+prob_kegagalan = 1 - keandalan_sistem
+reliabilities = {
+    "Stamping": r1f,
+    "Welding": r2f,
+    "Painting": r3f,
+    "Assembly": r4f
+}
+weakest_link_name = min(reliabilities, key=reliabilities.get)
+weakest_link_value = reliabilities[weakest_link_name]
+
+# Ringkasan hasil
+st.markdown("### ✅ 4️⃣ Ringkasan Hasil Sistem")
+col_res1, col_res2 = st.columns(2)
+with col_res1:
+    st.metric(label="📈 Keandalan Sistem", value=f"{keandalan_sistem:.2%}")
+with col_res2:
+    st.metric(label="📉 Probabilitas Kegagalan", value=f"{prob_kegagalan:.2%}")
+
+with st.expander("🔎 Penjelasan Singkat", expanded=False):
+    st.markdown(f"""
+    ➜ Sistem seri = semua mesin saling tergantung.  
+    ➜ Mesin dengan keandalan terendah yaitu **{weakest_link_name}** ({weakest_link_value:.0%}) menjadi *mata rantai lemah*.  
+    ➜ Meningkatkan keandalan di bagian ini → berdampak langsung pada sistem.
+    """)
+
+# Visualisasi Mesin Individu
+st.markdown("### 📈 5️⃣ Visualisasi Komponen")
+st.caption(f"✅ Bar merah = mesin dengan keandalan terendah yaitu {weakest_link_name} ({weakest_link_value:.0%}).")
+
+fig1, ax1 = plt.subplots(figsize=(8,4))
+colors = ['#87CEEB'] * 4
+colors[list(reliabilities.keys()).index(weakest_link_name)] = '#FF6347'
+ax1.bar(reliabilities.keys(), reliabilities.values(), color=colors)
+ax1.set_ylim(0.75, 1.01)
+ax1.set_ylabel('Keandalan')
+ax1.set_title('Keandalan Mesin Individu')
+for i, v in enumerate(reliabilities.values()):
+    ax1.text(i, v, f"{v:.2%}", ha='center', va='bottom')
+st.pyplot(fig1)
+
+# Visualisasi Sistem Total
+st.markdown("### 🟣 6️⃣ Visualisasi Sistem Total")
+st.caption("✅ Keandalan sistem total selalu lebih rendah dari komponen terlemah.")
+fig2, ax2 = plt.subplots(figsize=(4,4))
+ax2.bar(['Sistem Total'], [keandalan_sistem], color='#9370DB')
+ax2.set_ylim(0.75, 1.01)
+ax2.set_ylabel('Keandalan')
+ax2.set_title('Keandalan Sistem Total')
+ax2.text(0, keandalan_sistem, f"{keandalan_sistem:.2%}", ha='center', va='bottom')
+st.pyplot(fig2)
+
+# Analisis Risiko & Rekomendasi
+st.markdown("### 📋 7️⃣ Analisis Risiko & Rekomendasi")
+risk_category = "🟢 Rendah" if prob_kegagalan <= 0.05 else ("🟠 Menengah" if prob_kegagalan <= 0.10 else "🔴 Tinggi")
+st.info(f"**Kategori Risiko: {risk_category} ({prob_kegagalan:.2%})**")
+
+with st.expander("💡 Strategi Perbaikan yang Disarankan", expanded=False):
+    st.markdown(f"""
+    - Fokus perawatan preventif pada **{weakest_link_name}**.
+    - Standardisasi SOP untuk proses {weakest_link_name}.
+    - Terapkan pemantauan kondisi (Condition Monitoring).
+    - Pertimbangkan pelatihan operator untuk mengurangi human error.
+    - Lakukan evaluasi periodik untuk memverifikasi peningkatan keandalan.
+    """)
+
 st.caption("Dikembangkan oleh Naufal Khoirul Ibrahim – Matematika Terapan")
