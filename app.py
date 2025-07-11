@@ -4,136 +4,124 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Analisis Keandalan Lini Produksi", layout="wide")
 
-# =================================
-# Judul & Pengantar
-# =================================
+# ==========================
+# Judul & Pengantar Awal
+# ==========================
 st.title("🛠️ Analisis Keandalan Lini Produksi")
 st.subheader("Studi Kasus: Lini Perakitan Otomotif 'Nusantara Motor'")
 
 st.markdown("""
 📌 **Masalah yang Dianalisis**  
 Lini perakitan dengan mesin-mesin saling bergantung (sistem seri). Jika satu mesin gagal, seluruh lini berhenti.  
+
 🎯 **Tujuan:**  
-- Menghitung keandalan total sistem.  
-- Mengidentifikasi mata rantai terlemah.  
-- Memberikan rekomendasi perbaikan berbasis hasil analisis.  
+1. Menghitung keandalan total sistem.  
+2. Mengidentifikasi mata rantai terlemah.  
+3. Memberikan rekomendasi perbaikan.
 """)
 
 st.divider()
 
-# =================================
-# INPUT + TABEL -> Dua Kolom
-# =================================
-col_input, col_table = st.columns(2)
+# ==========================
+# SLIDER (kiri) + TABEL (kanan) dalam kolom
+# ==========================
+col1, col2 = st.columns([2, 1])
 
-with col_input:
-    st.subheader("🔧 Input Data: Keandalan Mesin (%)")
-    st.caption("Geser untuk mengatur keandalan mesin (dalam persen).")
-    r1 = st.slider("Stamping", 80, 100, 98)
-    r2 = st.slider("Welding", 80, 100, 99)
-    r3 = st.slider("Painting", 80, 100, 96)
-    r4 = st.slider("Assembly", 80, 100, 97)
+with col1:
+    st.subheader("1️⃣ Input Keandalan Mesin")
+    st.caption("Atur nilai keandalan tiap mesin dalam persen:")
+    with st.container(border=True):
+        r1 = st.slider("Stamping", 80, 100, 98)
+        r2 = st.slider("Welding", 80, 100, 99)
+        r3 = st.slider("Painting", 80, 100, 96)
+        r4 = st.slider("Assembly", 80, 100, 97)
 
-with col_table:
-    st.subheader("📊 Tabel Keandalan per Mesin")
-    data = {
-        "Mesin": ["Stamping", "Welding", "Painting", "Assembly"],
-        "Keandalan (%)": [r1, r2, r3, r4]
-    }
-    st.table(data)
+with col2:
+    with st.expander("📊 Tabel Keandalan Mesin"):
+        st.subheader("2️⃣ Ringkasan Input")
+        st.table({
+            "Mesin": ["Stamping", "Welding", "Painting", "Assembly"],
+            "Keandalan (%)": [r1, r2, r3, r4]
+        })
 
-# =================================
-# HASIL SISTEM + RISIKO -> Dua Kolom
-# =================================
-r_values = [r1/100, r2/100, r3/100, r4/100]
-Rs = np.prod(r_values)
-prob_fail = 1 - Rs
+# ==========================
+# PERHITUNGAN MODEL
+# ==========================
+r_vals = [r1/100, r2/100, r3/100, r4/100]
+Rs = np.prod(r_vals)
+P_fail = 1 - Rs
+weakest_name, weakest_val = min(zip(["Stamping", "Welding", "Painting", "Assembly"], r_vals), key=lambda x: x[1])
 
-weakest_machine = min(zip(["Stamping", "Welding", "Painting", "Assembly"], r_values), key=lambda x: x[1])
-weakest_name, weakest_val = weakest_machine
+# ==========================
+# HASIL SISTEM + RISIKO
+# ==========================
+st.divider()
+col3, col4 = st.columns(2)
 
-col_result, col_risk = st.columns(2)
+with col3:
+    st.subheader("3️⃣ Hasil Perhitungan")
+    st.metric(label="Keandalan Sistem", value=f"{Rs:.2%}")
+    st.metric(label="Probabilitas Kegagalan", value=f"{P_fail:.2%}")
+    st.caption("Hasil ini diperoleh dari perkalian keandalan seluruh mesin.")
 
-with col_result:
-    st.subheader("✅ Ringkasan Hasil Sistem")
-    st.metric(label="📈 Keandalan Sistem", value=f"{Rs:.2%}")
-    st.metric(label="📉 Probabilitas Kegagalan", value=f"{prob_fail:.2%}")
-    st.caption("Keandalan sistem dihitung dengan mengalikan semua komponen. Sistem seri berhenti jika satu mesin gagal.")
-
-with col_risk:
-    st.subheader("📋 Analisis Risiko & Rekomendasi")
-    if prob_fail > 0.10:
-        risk_level = "🔴 Risiko Tinggi"
-    elif prob_fail > 0.05:
-        risk_level = "🟠 Risiko Menengah"
-    else:
-        risk_level = "🟢 Risiko Rendah"
-
+with col4:
+    st.subheader("4️⃣ Analisis Risiko & Rekomendasi")
+    kategori = "🟠 Risiko Menengah" if P_fail > 0.05 else "🟢 Risiko Rendah"
     st.markdown(f"""
     ✅ **Mata Rantai Terlemah:** {weakest_name} ({weakest_val:.0%})  
-    ✅ **Kategori Risiko:** {risk_level} ({prob_fail:.2%})
+    ✅ **Kategori Risiko:** {kategori} ({P_fail:.2%})
     """)
     st.markdown("""
-    **🛠️ Rekomendasi:**
-    - Fokus perawatan pada mesin terlemah.
-    - Terapkan preventive maintenance.
-    - Standarkan SOP pada tahap kritis.
-    - Condition monitoring (sensor).
-    - Evaluasi periodik.
+    **Saran Perbaikan:**
+    - Fokuskan perawatan pada mesin **Painting**.
+    - Terapkan maintenance preventif & sensor.
+    - Standardisasi SOP dan pelatihan operator.
     """)
 
-# =================================
-# Detail Perhitungan (Expander)
-# =================================
-with st.expander("🔢 Detail Perhitungan (klik untuk buka/tutup)"):
+# ==========================
+# EXPANDER DETAIL PERHITUNGAN
+# ==========================
+with st.expander("🔍 Penjelasan Detail Perhitungan"):
     st.markdown("""
-    ✅ Rumus Sistem Seri:
+    - Model: Sistem Seri ➜ semua mesin harus berfungsi.
+    - Rumus:  
     """)
-    st.latex(r''' R_s = \prod_{i=1}^{n} R_i ''')
+    st.latex(r"R_s = \prod_{i=1}^{n} R_i")
     st.markdown(f"""
-    - Stamping = {r_values[0]:.2f}  
-    - Welding = {r_values[1]:.2f}  
-    - Painting = {r_values[2]:.2f}  
-    - Assembly = {r_values[3]:.2f}  
+    Substitusi nilai:  
+    R_s = {r_vals[0]:.2f} × {r_vals[1]:.2f} × {r_vals[2]:.2f} × {r_vals[3]:.2f} = {Rs:.4f}  
+    Probabilitas kegagalan = 1 - R_s = {P_fail:.4f}
     """)
-    st.latex(fr" R_s = {r_values[0]:.2f} \times {r_values[1]:.2f} \times {r_values[2]:.2f} \times {r_values[3]:.2f} = {Rs:.4f} ")
-    st.markdown(f"✅ **Keandalan Sistem:** {Rs:.2%}  \n✅ **Probabilitas Kegagalan:** {prob_fail:.2%}")
 
-# =================================
-# Visualisasi Grafik
-# =================================
+# ==========================
+# GRAFIK & PENJELASAN
+# ==========================
 st.divider()
-st.subheader("📊 Visualisasi Keandalan Komponen dan Sistem")
+st.subheader("5️⃣ Visualisasi Komponen & Sistem")
 
-labels = ["Stamping", "Welding", "Painting", "Assembly", "SISTEM TOTAL"]
-values = r_values + [Rs]
-
-fig, ax = plt.subplots(figsize=(10, 5))
+labels = ["Stamping", "Welding", "Painting", "Assembly", "SISTEM"]
+values = r_vals + [Rs]
 colors = ['#87CEEB'] * 4
 colors[["Stamping", "Welding", "Painting", "Assembly"].index(weakest_name)] = '#FF6347'
 colors.append('#9370DB')
 
+fig, ax = plt.subplots(figsize=(10, 5))
 bars = ax.bar(labels, values, color=colors)
-ax.set_ylabel('Keandalan (%)')
-ax.set_title('Perbandingan Keandalan Mesin dan Sistem')
 ax.set_ylim(0.75, 1.01)
-
+ax.set_ylabel("Tingkat Keandalan")
+ax.set_title("Perbandingan Keandalan Mesin dan Sistem")
 for bar in bars:
-    yval = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2.0, yval, f'{yval:.2%}', ha='center', va='bottom', fontsize=10)
-
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2%}", ha='center', va='bottom')
 st.pyplot(fig)
 
-with st.expander("ℹ️ Penjelasan Grafik (klik untuk buka/tutup)"):
+with st.expander("📘 Penjelasan Grafik"):
     st.markdown("""
-    - **Bar biru:** Komponen normal.
-    - **Bar merah:** Mesin dengan keandalan terendah.
-    - **Bar ungu:** Keandalan sistem total.
-    - Sistem seri berhenti jika satu mesin gagal ➜ mesin terlemah sangat menentukan.
+    - Bar merah: komponen terlemah.
+    - Bar ungu: total keandalan sistem.
+    - Sistem seri sangat sensitif terhadap 1 titik lemah.
     """)
 
-# =================================
-# Footer
-# =================================
-st.divider()
+# ==========================
+# FOOTER
+# ==========================
 st.caption("Dikembangkan oleh Naufal Khoirul Ibrahim – Matematika Terapan")
