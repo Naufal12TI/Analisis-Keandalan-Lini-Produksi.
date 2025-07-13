@@ -1,18 +1,13 @@
-# Aplikasi Perhitungan Economic Order Quantity (EOQ)
+# 📦 Aplikasi Perhitungan EOQ (Economic Order Quantity)
 
-Aplikasi web berbasis Streamlit untuk menghitung jumlah pemesanan optimal (EOQ) pada sistem persediaan.
+Simulasi sistem persediaan barang untuk menentukan jumlah pemesanan optimal.
 
-## Fitur
-- Input: Permintaan tahunan (D), biaya pesan (S), biaya simpan (H)
-- Output: EOQ, frekuensi pemesanan, waktu antar pemesanan
-- Penjelasan matematis singkat
-- Tampilan interaktif
+## Deskripsi
+Aplikasi menghitung jumlah pemesanan optimal (EOQ) yang meminimalkan total biaya persediaan.  
+Bisa membantu pengusaha menentukan strategi pemesanan yang efisien.
+
+**Fitur:**
+- Input: Permintaan tahunan, biaya pemesanan, biaya penyimpanan
+- Output: EOQ, total biaya persediaan, jumlah pemesanan per tahun
 
 ## Rumus
-EOQ = √(2DS/H)
-
-## Cara Jalankan
-pip install -r requirements.txt
-streamlit run app.py
-
-Dikembangkan oleh Naufal Khoirul Ibrahim - Matematika Terapan
