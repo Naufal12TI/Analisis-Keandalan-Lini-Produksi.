@@ -6,26 +6,39 @@ import numpy as np
 st.title("📦 Aplikasi Perhitungan EOQ (Economic Order Quantity)")
 
 # Studi Kasus
-with st.expander("ℹ️ Studi Kasus (Klik untuk lihat)"):
+with st.expander("ℹ Studi Kasus (Klik untuk lihat)"):
     st.markdown("""
     *Toko Sembako “Makmur Jaya”*  
-    Toko “Makmur Jaya” menjual beras dengan permintaan tahunan **12.000 kg**.  
-    Biaya pemesanan tiap kali order **Rp150.000**, dan biaya penyimpanan per **kg** per tahun **Rp1.000**.  
-    Pemilik ingin menghitung jumlah pembelian optimal (EOQ) untuk menekan total biaya persediaan.
+    Toko “Makmur Jaya” menjual beras dengan permintaan tahunan 12.000 kg.  
+    Biaya pemesanan tiap kali order Rp150.000, dan biaya penyimpanan per kg per tahun Rp1.000.  
+    Pemilik ingin menghitung jumlah pemesanan optimal (EOQ) untuk menekan total biaya persediaan.
     """)
 
-# Deskripsi Aplikasi
+# Deskripsi Aplikasi + Rumus + Contoh Hitung Manual
 with st.expander("💡 Deskripsi & Rumus (Klik untuk lihat)"):
-    st.markdown("""
-    Aplikasi ini menghitung *jumlah pembelian optimal (EOQ)* yang meminimalkan total biaya persediaan.
-    
+    st.markdown(r"""
+    Aplikasi ini menghitung *jumlah pemesanan optimal (EOQ)* yang meminimalkan total biaya persediaan.
+
     **Rumus EOQ:**
     $$
-    EOQ = \\sqrt{ \\frac{2DS}{H} }
+    EOQ = \sqrt{ \frac{2DS}{H} }
     $$
     - D = Permintaan tahunan (kg)
     - S = Biaya pemesanan per order (Rp)
     - H = Biaya penyimpanan per kg per tahun (Rp)
+
+    **Contoh Perhitungan Manual:**
+    - D = 12.000 kg
+    - S = Rp150.000
+    - H = Rp1.000
+
+    $$
+    EOQ = \sqrt{ \frac{2 \times 12.000 \times 150.000}{1.000} } 
+         = \sqrt{3.600.000} 
+         \approx 1.897,37 \text{ kg}
+    $$
+
+    Jadi jumlah pembelian optimal per pesanan adalah sekitar **1.897 kg**.
     """)
 
 # Sidebar Input
@@ -47,7 +60,7 @@ st.header("✅ Hasil Perhitungan EOQ")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.metric("📦 Jumlah Pembelian Optimal (EOQ)", f"{EOQ:.2f} kg")
+    st.metric("📦 Jumlah Pemesanan Optimal (EOQ)", f"{EOQ:.2f} kg")
     st.metric("📈 Jumlah Pesan per Tahun", f"{num_orders:.2f} kali")
 
 with col2:
@@ -58,12 +71,10 @@ st.subheader("💵 Estimasi Total Biaya Persediaan")
 st.success(f"Total biaya tahunan diperkirakan: Rp {total_cost:,.0f}")
 
 # Penjelasan Singkat (untuk presentasi)
-with st.expander("🗂️ Penjelasan Konsep (Klik untuk bantu presentasi)"):
+with st.expander("🗂 Penjelasan Konsep (Klik untuk bantu presentasi)"):
     st.markdown("""
-    - *EOQ (Economic Order Quantity)* adalah **jumlah pembelian optimal** untuk meminimalkan biaya pemesanan dan biaya penyimpanan.
-    - Tujuannya membuat sistem persediaan lebih efisien dengan biaya serendah mungkin.
-    - Biaya total = biaya pesan + biaya simpan.
-    - EOQ dihitung supaya frekuensi pemesanan dan rata-rata stok seimbang, sehingga total biaya minimum.
-    - Aplikasi ini bisa untuk simulasi berbagai skenario (berbeda permintaan/biaya).
+    - *EOQ (Economic Order Quantity)* adalah jumlah pembelian optimal yang meminimalkan total biaya persediaan.
+    - Biaya total terdiri dari *biaya pemesanan* dan *biaya penyimpanan*.
+    - Dengan menghitung EOQ, pemilik usaha bisa menekan biaya logistik dan membuat sistem persediaan lebih efisien.
+    - Aplikasi ini dapat digunakan untuk simulasi berbagai skenario biaya dan permintaan.
     """)
-
