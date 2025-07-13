@@ -1,1 +1,1 @@
-# case-Anilis-Kendala-Lini-Produksi.
+# Analisis Economic Order Quantity (EOQ).
