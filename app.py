@@ -1,60 +1,69 @@
+# eoq_app.py
 import streamlit as st
 import numpy as np
 
-st.set_page_config(page_title="Perhitungan EOQ - Toko Makmur", layout="centered")
+# Judul halaman
+st.title("📦 Aplikasi Perhitungan EOQ (Economic Order Quantity)")
 
-st.title("📦 Perhitungan Economic Order Quantity (EOQ) - Toko Makmur Jaya")
+# Studi Kasus
+with st.expander("ℹ️ Studi Kasus (Klik untuk lihat)"):
+    st.markdown("""
+    *Toko Sembako “Makmur Jaya”*  
+    Toko “Makmur Jaya” menjual beras dengan permintaan tahunan **12.000 kg**.  
+    Biaya pemesanan tiap kali order **Rp150.000**, dan biaya penyimpanan per **kg** per tahun **Rp1.000**.  
+    Pemilik ingin menghitung jumlah pembelian optimal (EOQ) untuk menekan total biaya persediaan.
+    """)
 
-st.markdown("""
-Aplikasi ini membantu menghitung **jumlah pembelian optimal (EOQ)** untuk mengurangi biaya penyimpanan dan pemesanan.
-""")
+# Deskripsi Aplikasi
+with st.expander("💡 Deskripsi & Rumus (Klik untuk lihat)"):
+    st.markdown("""
+    Aplikasi ini menghitung *jumlah pembelian optimal (EOQ)* yang meminimalkan total biaya persediaan.
+    
+    **Rumus EOQ:**
+    $$
+    EOQ = \\sqrt{ \\frac{2DS}{H} }
+    $$
+    - D = Permintaan tahunan (kg)
+    - S = Biaya pemesanan per order (Rp)
+    - H = Biaya penyimpanan per kg per tahun (Rp)
+    """)
 
-st.header("📌 Input Parameter")
+# Sidebar Input
+st.sidebar.header("📌 Input Parameter")
+D = st.sidebar.number_input("Permintaan tahunan (kg)", value=12000, min_value=1)
+S = st.sidebar.number_input("Biaya pemesanan per order (Rp)", value=150000, min_value=1)
+H = st.sidebar.number_input("Biaya penyimpanan per kg per tahun (Rp)", value=1000, min_value=1)
 
-D = st.number_input("Permintaan tahunan (kg)", min_value=1000, value=12000, step=1000)
-S = st.number_input("Biaya pemesanan per order (Rp)", min_value=50000, value=150000, step=10000)
-H = st.number_input("Biaya penyimpanan per kg per tahun (Rp)", min_value=500, value=1000, step=100)
-
-st.divider()
-
-st.header("📐 Rumus EOQ")
-st.latex(r"EOQ = \sqrt{\frac{2DS}{H}}")
-
+# Hitung EOQ
 EOQ = np.sqrt((2 * D * S) / H)
-n_order = D / EOQ
-total_order_cost = n_order * S
-avg_inventory = EOQ / 2
-total_holding_cost = avg_inventory * H
-total_cost = total_order_cost + total_holding_cost
+num_orders = D / EOQ
+total_ordering_cost = num_orders * S
+average_inventory = EOQ / 2
+total_holding_cost = average_inventory * H
+total_cost = total_ordering_cost + total_holding_cost
 
-st.subheader("✅ Hasil Perhitungan")
+# Hasil Perhitungan
+st.header("✅ Hasil Perhitungan EOQ")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.metric(label="Jumlah Pembelian Optimal (EOQ)", value=f"{EOQ:,.2f} kg")
-    st.metric(label="Jumlah Pemesanan per Tahun", value=f"{n_order:.2f} kali")
+    st.metric("📦 Jumlah Pembelian Optimal (EOQ)", f"{EOQ:.2f} kg")
+    st.metric("📈 Jumlah Pesan per Tahun", f"{num_orders:.2f} kali")
+
 with col2:
-    st.metric(label="Total Biaya Pemesanan", value=f"Rp {total_order_cost:,.0f}")
-    st.metric(label="Total Biaya Penyimpanan", value=f"Rp {total_holding_cost:,.0f}")
+    st.metric("💰 Total Biaya Pemesanan", f"Rp {total_ordering_cost:,.0f}")
+    st.metric("💰 Total Biaya Penyimpanan", f"Rp {total_holding_cost:,.0f}")
 
-st.success(f"💵 Estimasi Total Biaya Persediaan per Tahun: Rp {total_cost:,.0f}")
+st.subheader("💵 Estimasi Total Biaya Persediaan")
+st.success(f"Total biaya tahunan diperkirakan: Rp {total_cost:,.0f}")
 
-with st.expander("ℹ️ Penjelasan Konsep EOQ (bisa dibuka/tutup)"):
+# Penjelasan Singkat (untuk presentasi)
+with st.expander("🗂️ Penjelasan Konsep (Klik untuk bantu presentasi)"):
     st.markdown("""
-    - EOQ membantu menentukan **jumlah pembelian optimal** untuk meminimalkan biaya persediaan.
-    - Biaya total terdiri dari **biaya pemesanan** dan **biaya penyimpanan**.
-    - Dengan membagi rata-rata stok (**EOQ/2**), kita menghitung biaya penyimpanan lebih realistis karena stok terus berkurang seiring waktu.
+    - *EOQ (Economic Order Quantity)* adalah **jumlah pembelian optimal** untuk meminimalkan biaya pemesanan dan biaya penyimpanan.
+    - Tujuannya membuat sistem persediaan lebih efisien dengan biaya serendah mungkin.
+    - Biaya total = biaya pesan + biaya simpan.
+    - EOQ dihitung supaya frekuensi pemesanan dan rata-rata stok seimbang, sehingga total biaya minimum.
+    - Aplikasi ini bisa untuk simulasi berbagai skenario (berbeda permintaan/biaya).
     """)
 
-with st.expander("📌 Studi Kasus"):
-    st.markdown("""
-    **Toko Sembako Makmur Jaya**
-    
-    - Permintaan tahunan beras: 12.000 kg
-    - Biaya pesan setiap kali order: Rp 150.000
-    - Biaya penyimpanan: Rp 1.000 per kg per tahun
-
-    Pemilik ingin mengetahui berapa kg sebaiknya dia pesan setiap kali agar total biaya persediaan paling rendah.
-    """)
-
-st.caption("Dikembangkan untuk tugas Matematika Terapan - EOQ")
